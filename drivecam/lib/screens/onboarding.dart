@@ -2,14 +2,14 @@ import 'package:drivecam/widgets/app_bar.dart';
 import 'package:drivecam/widgets/bottom_app_bar.dart';
 import 'package:flutter/material.dart';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+class OnboardingScreen extends StatelessWidget {
+  const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      appBar: MyAppBar(title: 'Settings'),
-      body: Center(child: Text('Settings')),
+      appBar: MyAppBar(title: 'Onboarding'),
+      body: Center(child: Text('Onboarding')),
       bottomNavigationBar: MyBottomNavBar(),
     );
   }

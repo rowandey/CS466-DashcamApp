@@ -5,7 +5,16 @@ class ThemeProvider extends ChangeNotifier {
   // use system theme for light/dark
   ThemeMode themeMode = ThemeMode.system;
 
-  Color seedColor = Colors.red;
+  bool recordingOn = false;
+
+  Color seedColor = const Color.fromARGB(255, 45, 78, 148);
+  Color recordButtonColor = Color.fromARGB(255, 100, 100, 100);
+
+  void toggleRecordingButtonColor() {
+    recordingOn = !recordingOn;
+    recordButtonColor = recordingOn ? Color.fromARGB(255, 255, 0, 0) : Color.fromARGB(255, 100, 100, 100);
+    notifyListeners();
+  }
 
   void setSeedColor(Color color) {
     seedColor = color;

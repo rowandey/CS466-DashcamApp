@@ -1,29 +1,35 @@
+import 'package:camera/camera.dart';
 import 'package:drivecam/widgets/app_bar.dart';
+import 'package:drivecam/widgets/bottom_app_bar.dart';
 import 'package:drivecam/provider/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final cameras = await availableCameras();
+  final firstCamera = cameras.first;
+
   runApp(
     MultiProvider(
       providers: [ChangeNotifierProvider(create: (context) => ThemeProvider())],
-      child: const MainApp(),
+      child: MainApp(camera: firstCamera),
     ),
   );
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  final CameraDescription camera;
+  const MainApp({super.key, required this.camera});
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     return MaterialApp(
-      // light mode
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: themeProvider.seedColor),
       ),
-      // dark mode
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: themeProvider.seedColor,
@@ -31,32 +37,51 @@ class MainApp extends StatelessWidget {
         ),
       ),
       themeMode: themeProvider.themeMode,
-      home: const Scaffold(
-        appBar: MyAppBar(title: 'Example'),
-        body: Center(child: HomePage()),
+      home: Scaffold(
+        appBar: const MyAppBar(title: 'Example'),
+        body: HomePage(camera: camera),
+        bottomNavigationBar: const MyBottomNavBar(),
       ),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final CameraDescription camera;
+  const HomePage({super.key, required this.camera});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  // load initial state
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
+
   @override
   void initState() {
     super.initState();
-    final themeProvider = context.read<ThemeProvider>();
-    themeProvider.loadDarkModePrefs();
+    context.read<ThemeProvider>().loadDarkModePrefs();
+    _controller = CameraController(widget.camera, ResolutionPreset.max);
+    _initializeControllerFuture = _controller.initialize();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Text('Hello World!');
+    return FutureBuilder<void>(
+      future: _initializeControllerFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return CameraPreview(_controller);
+        }
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
   }
 }
