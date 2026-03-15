@@ -30,7 +30,6 @@ const selectRecording = '''
   LIMIT 1
 ''';
 
-// Parameters: recording_location, recording_length, recording_size, id
 const updateRecording = '''
   UPDATE recording
   SET recording_location = ?,
@@ -80,20 +79,24 @@ const insertClip = '''
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 ''';
 
-// Returns all clips sorted newest first.
 const selectAllClips = '''
   SELECT id, date_time, date_time_pretty, clip_length, clip_size, trigger_type, is_flagged, clip_location, thumbnail_location
   FROM clips
   ORDER BY date_time DESC
 ''';
 
-// Used for both user-initiated and app-initiated deletion by id.
+const updateClipFlag = '''
+  UPDATE clips
+  SET is_flagged = ?
+  WHERE id = ?
+''';
+
 const deleteClip = '''
   DELETE FROM clips
   WHERE id = ?
 ''';
 
-// App-initiated: removes the oldest clip when storage capacity is enforced.
+// should only be used by the app
 const deleteOldestClip = '''
   DELETE FROM clips
   WHERE id = (
@@ -101,11 +104,4 @@ const deleteOldestClip = '''
     ORDER BY date_time ASC
     LIMIT 1
   )
-''';
-
-// Parameters: is_flagged (0 or 1), id
-const updateClipFlagged = '''
-  UPDATE clips
-  SET is_flagged = ?
-  WHERE id = ?
 ''';
